@@ -189,7 +189,7 @@ git push <backend-remote> split/backend:main
 ```
 
 4. Create `annie-infra` from the proposed contents above.
-5. Update infra deployment scripts to pull/build from the new frontend/backend repositories or, preferably, deploy tagged Docker images.
+5. Use `scripts/deploy-app.sh` in its default split mode to pull/build from the new frontend/backend repositories.
 6. Run:
 
 ```bash
@@ -201,3 +201,35 @@ DOMAIN=www.linany.com API_DOMAIN=api.linany.com ./scripts/smoke-production.sh
 - Whether `annie-infra` should build from Git source or consume Docker images pushed by frontend/backend CI.
 - Whether frontend should move to CDN/static hosting later while keeping Nginx as the API and redirect layer.
 - Whether to keep `docker-compose.backend-only.yml` long term or replace it with service-specific development compose files.
+
+## Current Infra Deploy Mode
+
+`scripts/deploy-app.sh` now defaults to split-repository deployment:
+
+```bash
+DEPLOY_MODE=split
+REMOTE_DIR=/root/annie-deploy
+FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
+BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
+FRONTEND_BRANCH=main
+BACKEND_BRANCH=main
+```
+
+The remote deployment directory is assembled as:
+
+```text
+/root/annie-deploy/
+├── docker-compose.yml
+├── .env
+├── frontend/
+└── backend/
+```
+
+The old mono-repo flow remains available for rollback/transition:
+
+```bash
+DEPLOY_MODE=monorepo
+REMOTE_DIR=/root/annie-website
+REPO_URL=https://github.com/DeepUmbrella/annie-website.git
+DEPLOY_BRANCH=main
+```

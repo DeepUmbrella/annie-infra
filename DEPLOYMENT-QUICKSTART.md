@@ -64,6 +64,10 @@ SSH_USER=ubuntu
 SSH_KEY=~/.ssh/annie-deploy
 DOMAIN=your-domain.com
 API_DOMAIN=api.your-domain.com
+REMOTE_DIR=/root/annie-deploy
+DEPLOY_MODE=split
+FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
+BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
 DOCKER_REGISTRY_MIRROR=https://your-registry-mirror.com
 SSL_CERT_PATH=/path/to/fullchain.pem
 SSL_KEY_PATH=/path/to/privkey.pem
@@ -77,6 +81,8 @@ API_SSL_KEY_PATH=/path/to/api-privkey.pem
 - `SSH_USER` 是服务器登录用户，推荐使用具备 `sudo` 权限的非 `root` 用户
 - `SSH_KEY` 默认可以使用脚本生成的 `~/.ssh/annie-deploy`
 - `API_DOMAIN` 是后端 API 域名，默认建议使用 `api.your-domain.com`
+- `REMOTE_DIR` 是服务器部署目录；split 部署默认使用 `/root/annie-deploy`
+- `DEPLOY_MODE=split` 会分别拉取 `annie-frontend` 和 `annie-backend`
 - `DOCKER_REGISTRY_MIRROR` 是 Docker 镜像加速地址，`setup-server.sh` 会强制要求这个值
 - `SSL_CERT_PATH` / `SSL_KEY_PATH` 是前端域名证书，`API_SSL_CERT_PATH` / `API_SSL_KEY_PATH` 是 API 域名证书；如果使用泛域名证书，API 证书路径可以和前端证书路径相同
 
@@ -331,9 +337,9 @@ env $(cat deploy.env | xargs) ./scripts/setup-server.sh
 优先查看这些输出：
 
 ```bash
-ssh user@server "cd /root/annie-website && docker compose ps"
-ssh user@server "cd /root/annie-website && docker compose logs --tail=100 backend"
-ssh user@server "cd /root/annie-website && docker compose logs --tail=100 frontend"
+ssh user@server "cd /root/annie-deploy && docker compose ps"
+ssh user@server "cd /root/annie-deploy && docker compose logs --tail=100 backend"
+ssh user@server "cd /root/annie-deploy && docker compose logs --tail=100 frontend"
 ```
 
 ## 相关文档
