@@ -27,6 +27,7 @@ BACKEND_BRANCH="${BACKEND_BRANCH:-main}"
 REMOTE_DIR="${REMOTE_DIR:-/root/annie-deploy}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-annie-website}"
 COMPOSE_CMD="${COMPOSE_CMD:-docker compose}"
+COMPOSE_PARALLEL_LIMIT="${COMPOSE_PARALLEL_LIMIT:-1}"
 DATABASE_URL="postgresql://annie:${POSTGRES_PASSWORD}@postgres:5432/annie_db?schema=public"
 NPM_REGISTRY="${NPM_REGISTRY:-https://registry.npmmirror.com}"
 if [[ "$DOMAIN" == www.* ]]; then
@@ -156,6 +157,7 @@ main() {
     cat >"$TMP_ROOT_ENV" <<EOF
 NODE_ENV=production
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+COMPOSE_PARALLEL_LIMIT=${COMPOSE_PARALLEL_LIMIT}
 BACKEND_PORT=3001
 API_DOMAIN=${API_DOMAIN}
 VITE_API_URL=https://${API_DOMAIN}
@@ -250,13 +252,13 @@ EOF
             exit 1
         fi
 
-        # Pull images in parallel
+        # Keep pulls/builds conservative for small production hosts.
         for IMG in 'postgres:15' 'redis:7' 'getmeili/meilisearch:v1.3'; do
-            docker pull \"\$IMG\" &
+            docker pull \"\$IMG\"
         done
-        wait
 
         cd $REMOTE_DIR
+        export COMPOSE_PARALLEL_LIMIT=${COMPOSE_PARALLEL_LIMIT}
         \$COMPOSE_BIN up -d --build --remove-orphans
     "; then
         log_error "Failed to start services"
@@ -314,7 +316,7 @@ EOF
     fi
 
     # Check frontend health (via SSH, internal 127.0.0.1)
-    if ! check_service_health "Frontend" "http://127.0.0.1/health" true; then
+    if ! check_service_health "Frontend" "http://127.0.0.1:3000/health" true; then
         log_error "Frontend health check failed"
         exit 1
     fi
