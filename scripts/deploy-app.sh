@@ -25,6 +25,7 @@ BACKEND_REPO_URL="${BACKEND_REPO_URL:-https://github.com/DeepUmbrella/annie-back
 FRONTEND_BRANCH="${FRONTEND_BRANCH:-main}"
 BACKEND_BRANCH="${BACKEND_BRANCH:-main}"
 REMOTE_DIR="${REMOTE_DIR:-/root/annie-deploy}"
+COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-annie-website}"
 COMPOSE_CMD="${COMPOSE_CMD:-docker compose}"
 DATABASE_URL="postgresql://annie:${POSTGRES_PASSWORD}@postgres:5432/annie_db?schema=public"
 NPM_REGISTRY="${NPM_REGISTRY:-https://registry.npmmirror.com}"
@@ -154,6 +155,7 @@ main() {
 
     cat >"$TMP_ROOT_ENV" <<EOF
 NODE_ENV=production
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
 BACKEND_PORT=3001
 API_DOMAIN=${API_DOMAIN}
 VITE_API_URL=https://${API_DOMAIN}

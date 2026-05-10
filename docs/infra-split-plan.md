@@ -208,6 +208,7 @@ DOMAIN=www.linany.com API_DOMAIN=api.linany.com ./scripts/smoke-production.sh
 
 ```bash
 REMOTE_DIR=/root/annie-deploy
+COMPOSE_PROJECT_NAME=annie-website
 FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
 BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
 FRONTEND_BRANCH=main
@@ -223,3 +224,5 @@ The remote deployment directory is assembled as:
 ├── frontend/
 └── backend/
 ```
+
+`COMPOSE_PROJECT_NAME` should remain `annie-website` during migration so Docker Compose continues using the existing containers and named volumes.

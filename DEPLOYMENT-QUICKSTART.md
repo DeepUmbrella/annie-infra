@@ -65,6 +65,7 @@ SSH_KEY=~/.ssh/annie-deploy
 DOMAIN=your-domain.com
 API_DOMAIN=api.your-domain.com
 REMOTE_DIR=/root/annie-deploy
+COMPOSE_PROJECT_NAME=annie-website
 FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
 BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
 DOCKER_REGISTRY_MIRROR=https://your-registry-mirror.com
@@ -81,6 +82,7 @@ API_SSL_KEY_PATH=/path/to/api-privkey.pem
 - `SSH_KEY` 默认可以使用脚本生成的 `~/.ssh/annie-deploy`
 - `API_DOMAIN` 是后端 API 域名，默认建议使用 `api.your-domain.com`
 - `REMOTE_DIR` 是服务器部署目录，默认使用 `/root/annie-deploy`
+- `COMPOSE_PROJECT_NAME=annie-website` 保持 Docker Compose project 名不变，避免迁移目录时创建新的数据库 volume
 - `FRONTEND_REPO_URL` 和 `BACKEND_REPO_URL` 是部署脚本拉取的应用仓库
 - `DOCKER_REGISTRY_MIRROR` 是 Docker 镜像加速地址，`setup-server.sh` 会强制要求这个值
 - `SSL_CERT_PATH` / `SSL_KEY_PATH` 是前端域名证书，`API_SSL_CERT_PATH` / `API_SSL_KEY_PATH` 是 API 域名证书；如果使用泛域名证书，API 证书路径可以和前端证书路径相同

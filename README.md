@@ -51,6 +51,7 @@ Repository variables:
 
 ```bash
 REMOTE_DIR=/root/annie-deploy
+COMPOSE_PROJECT_NAME=annie-website
 FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
 BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
 FRONTEND_BRANCH=main
