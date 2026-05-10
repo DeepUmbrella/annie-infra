@@ -20,9 +20,6 @@ if [ "$SSH_USER" = "root" ]; then
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-DEPLOY_MODE="${DEPLOY_MODE:-split}"
-REPO_URL="${REPO_URL:-https://github.com/DeepUmbrella/annie-website.git}"
-DEPLOY_BRANCH="${DEPLOY_BRANCH:-main}"
 FRONTEND_REPO_URL="${FRONTEND_REPO_URL:-https://github.com/DeepUmbrella/annie-frontend.git}"
 BACKEND_REPO_URL="${BACKEND_REPO_URL:-https://github.com/DeepUmbrella/annie-backend.git}"
 FRONTEND_BRANCH="${FRONTEND_BRANCH:-main}"
@@ -190,56 +187,34 @@ CORS_ORIGIN=https://${DOMAIN}
 EOF
 
     log_info "1) 获取项目代码"
-    if [ "$DEPLOY_MODE" = "split" ]; then
-        cp "$PROJECT_ROOT/docker-compose.yml" "$TMP_COMPOSE_FILE"
-        if ! scp "${SSH_OPTS[@]}" "$TMP_COMPOSE_FILE" "$SSH_TARGET:/tmp/annie-docker-compose.yml" ||
-           ! ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
-               set -e
-               update_git_checkout() {
-                   local repo_url=\$1
-                   local branch=\$2
-                   local dir=\$3
+    cp "$PROJECT_ROOT/docker-compose.yml" "$TMP_COMPOSE_FILE"
+    if ! scp "${SSH_OPTS[@]}" "$TMP_COMPOSE_FILE" "$SSH_TARGET:/tmp/annie-docker-compose.yml" ||
+       ! ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
+           set -e
+           update_git_checkout() {
+               local repo_url=\$1
+               local branch=\$2
+               local dir=\$3
 
-                   if [ -d \"\$dir/.git\" ]; then
-                       cd \"\$dir\"
-                       git remote set-url origin \"\$repo_url\" 2>/dev/null || git remote add origin \"\$repo_url\"
-                       git fetch origin
-                       git checkout \"\$branch\" 2>/dev/null || git checkout -B \"\$branch\" \"origin/\$branch\"
-                       git pull --rebase origin \"\$branch\"
-                   else
-                       rm -rf \"\$dir\"
-                       git clone --branch \"\$branch\" \"\$repo_url\" \"\$dir\"
-                   fi
-               }
+               if [ -d \"\$dir/.git\" ]; then
+                   cd \"\$dir\"
+                   git remote set-url origin \"\$repo_url\" 2>/dev/null || git remote add origin \"\$repo_url\"
+                   git fetch origin
+                   git checkout \"\$branch\" 2>/dev/null || git checkout -B \"\$branch\" \"origin/\$branch\"
+                   git pull --rebase origin \"\$branch\"
+               else
+                   rm -rf \"\$dir\"
+                   git clone --branch \"\$branch\" \"\$repo_url\" \"\$dir\"
+               fi
+           }
 
-               mkdir -p '$REMOTE_DIR'
-               update_git_checkout '$FRONTEND_REPO_URL' '$FRONTEND_BRANCH' '$REMOTE_DIR/frontend'
-               update_git_checkout '$BACKEND_REPO_URL' '$BACKEND_BRANCH' '$REMOTE_DIR/backend'
-               mv /tmp/annie-docker-compose.yml '$REMOTE_DIR/docker-compose.yml'
-           "; then
-            log_error "Failed to update split repositories"
-            rollback
-            exit 1
-        fi
-    elif [ "$DEPLOY_MODE" = "monorepo" ]; then
-        if ! ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
-            set -e
-            if [ -d '$REMOTE_DIR/.git' ]; then
-                cd '$REMOTE_DIR'
-                git remote set-url origin '$REPO_URL' 2>/dev/null || git remote add origin '$REPO_URL'
-                git fetch origin
-                git checkout '$DEPLOY_BRANCH' 2>/dev/null || git checkout -B '$DEPLOY_BRANCH' 'origin/$DEPLOY_BRANCH'
-                git pull --rebase origin '$DEPLOY_BRANCH'
-            else
-                rm -rf '$REMOTE_DIR' && git clone --branch '$DEPLOY_BRANCH' '$REPO_URL' '$REMOTE_DIR'
-            fi
-        "; then
-            log_error "Failed to update monorepo"
-            rollback
-            exit 1
-        fi
-    else
-        log_error "Unsupported DEPLOY_MODE: $DEPLOY_MODE"
+           mkdir -p '$REMOTE_DIR'
+           update_git_checkout '$FRONTEND_REPO_URL' '$FRONTEND_BRANCH' '$REMOTE_DIR/frontend'
+           update_git_checkout '$BACKEND_REPO_URL' '$BACKEND_BRANCH' '$REMOTE_DIR/backend'
+           mv /tmp/annie-docker-compose.yml '$REMOTE_DIR/docker-compose.yml'
+       "; then
+        log_error "Failed to update split repositories"
+        rollback
         exit 1
     fi
 

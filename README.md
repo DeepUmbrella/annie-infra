@@ -38,7 +38,7 @@ env $(cat deploy.env | xargs) ./scripts/setup-nginx.sh
 env $(cat deploy.env | xargs) ./scripts/deploy-app.sh
 ```
 
-By default, `deploy-app.sh` uses split-repository deployment:
+`deploy-app.sh` deploys from the split frontend and backend repositories:
 
 ```text
 /root/annie-deploy/
@@ -47,24 +47,14 @@ By default, `deploy-app.sh` uses split-repository deployment:
 └── backend/   # cloned from annie-backend
 ```
 
-Default repository variables:
+Repository variables:
 
 ```bash
-DEPLOY_MODE=split
 REMOTE_DIR=/root/annie-deploy
 FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
 BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
 FRONTEND_BRANCH=main
 BACKEND_BRANCH=main
-```
-
-For the old mono-repo deployment flow, set:
-
-```bash
-DEPLOY_MODE=monorepo
-REMOTE_DIR=/root/annie-website
-REPO_URL=https://github.com/DeepUmbrella/annie-website.git
-DEPLOY_BRANCH=main
 ```
 
 ## Production Smoke Check

@@ -204,10 +204,9 @@ DOMAIN=www.linany.com API_DOMAIN=api.linany.com ./scripts/smoke-production.sh
 
 ## Current Infra Deploy Mode
 
-`scripts/deploy-app.sh` now defaults to split-repository deployment:
+`scripts/deploy-app.sh` deploys from the split frontend and backend repositories:
 
 ```bash
-DEPLOY_MODE=split
 REMOTE_DIR=/root/annie-deploy
 FRONTEND_REPO_URL=https://github.com/DeepUmbrella/annie-frontend.git
 BACKEND_REPO_URL=https://github.com/DeepUmbrella/annie-backend.git
@@ -223,13 +222,4 @@ The remote deployment directory is assembled as:
 ├── .env
 ├── frontend/
 └── backend/
-```
-
-The old mono-repo flow remains available for rollback/transition:
-
-```bash
-DEPLOY_MODE=monorepo
-REMOTE_DIR=/root/annie-website
-REPO_URL=https://github.com/DeepUmbrella/annie-website.git
-DEPLOY_BRANCH=main
 ```
