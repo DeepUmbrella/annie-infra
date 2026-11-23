@@ -58,6 +58,43 @@ FRONTEND_BRANCH=main
 BACKEND_BRANCH=main
 ```
 
+## Frontend Image Releases
+
+On the deployment host, place `docker-compose.frontend-image.yml` beside
+`/root/annie-deploy/docker-compose.yml` and install
+`scripts/deploy-frontend-image.sh` in `/root/annie-deploy/scripts`.
+Docker Compose v2 must support `!reset` in merge files and `up --wait`.
+When the GHCR package is private, authenticate Docker on the server with a
+read-only package credential before deploying.
+
+Run an image release with the digest published by the frontend build:
+
+```bash
+/root/annie-deploy/scripts/deploy-frontend-image.sh \
+  ghcr.io/deepumbrella/annie-frontend@sha256:<64-hex-digit-digest>
+```
+
+The script uses the existing `annie-website` Compose project and environment.
+It pulls only the frontend image, records the current container's exact local
+image under an `annie-frontend-rollback` tag, and replaces only the frontend.
+Verification checks the container's image ID and loopback health, then compares
+the built JavaScript entry point and response bytes over loopback and the
+public HTTPS site. If replacement fails, it restores the recorded local image.
+Run the broader production smoke check below to verify API and Nginx routes
+independently.
+
+To return to the previously running image:
+
+```bash
+/root/annie-deploy/scripts/deploy-frontend-image.sh --rollback
+```
+
+Keep `.frontend-deploy` and the local rollback tags on the deployment host. If an
+interruption leaves a pending release, the next invocation attempts recovery
+first and exits so the requested release can be retried separately. Coordinate
+any full-stack deployment with frontend image releases since both manage the
+same frontend container.
+
 ## Production Smoke Check
 
 ```bash
