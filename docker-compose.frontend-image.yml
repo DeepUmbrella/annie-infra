@@ -1,0 +1,4 @@
+services:
+  frontend:
+    build: !reset null
+    image: ${FRONTEND_IMAGE:?Set FRONTEND_IMAGE to the release or rollback image}
